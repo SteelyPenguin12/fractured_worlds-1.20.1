@@ -1,6 +1,9 @@
 package net.codywiebekehler.fracturedworldsmod;
 
 import com.mojang.logging.LogUtils;
+import net.codywiebekehler.fracturedworldsmod.entity.ModEntities;
+import net.codywiebekehler.fracturedworldsmod.entity.client.AllSightRenderer;
+import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
@@ -23,6 +26,8 @@ public class FracturedWorldsMod {
 
     public FracturedWorldsMod(FMLJavaModLoadingContext context) {
         IEventBus modEventBus = context.getModEventBus();
+
+        ModEntities.register(modEventBus);
 
         modEventBus.addListener(this::commonSetup);
 
@@ -50,7 +55,7 @@ public class FracturedWorldsMod {
     public static class ClientModEvents{
         @SubscribeEvent
         public static void onClientSetup(FMLClientSetupEvent event){
-
+            EntityRenderers.register(ModEntities.AllSight.get(), AllSightRenderer::new);
         }
     }
 }
