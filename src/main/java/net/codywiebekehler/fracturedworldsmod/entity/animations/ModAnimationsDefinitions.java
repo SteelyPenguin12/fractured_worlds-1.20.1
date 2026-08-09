@@ -7,9 +7,6 @@ import net.minecraft.client.animation.KeyframeAnimations;
 
 public class ModAnimationsDefinitions{
     public static final AnimationDefinition ALL_SIGHT_IDLE = AnimationDefinition.Builder.withLength(2.0F).looping()
-            .addAnimation("h_head", new AnimationChannel(AnimationChannel.Targets.ROTATION,
-                    new Keyframe(0.0F, KeyframeAnimations.degreeVec(-2.5732F, 5.102F, 0.7481F), AnimationChannel.Interpolations.LINEAR)
-            ))
             .addAnimation("Chest", new AnimationChannel(AnimationChannel.Targets.ROTATION,
                     new Keyframe(0.0F, KeyframeAnimations.degreeVec(-2.5F, 0.0F, 0.0F), AnimationChannel.Interpolations.CATMULLROM),
                     new Keyframe(1.0F, KeyframeAnimations.degreeVec(-2.5024F, 0.109F, -2.4976F), AnimationChannel.Interpolations.CATMULLROM),

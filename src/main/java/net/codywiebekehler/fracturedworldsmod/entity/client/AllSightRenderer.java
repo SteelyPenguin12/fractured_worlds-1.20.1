@@ -21,7 +21,7 @@ public class AllSightRenderer extends MobRenderer<AllSightEntity, AllSightModel<
     @Override
     public void render(AllSightEntity pEntity, float pEntityYaw, float pPartialTicks, PoseStack pPoseStack,
                        MultiBufferSource pBuffer, int pPackedLight) {
-//        pPoseStack.scale(0.75f,0.75f,0.75f);
+          pPoseStack.scale(0.5f,0.5f,0.5f);
 //        pPoseStack.translate(0,1f,0);
 //        pPoseStack.mulPose(Axis.YP.rotationDegrees(90));
         super.render(pEntity, pEntityYaw, pPartialTicks, pPoseStack, pBuffer, pPackedLight);
