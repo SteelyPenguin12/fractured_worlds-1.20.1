@@ -482,8 +482,9 @@ public class AllSightModel<T extends Entity> extends HierarchicalModel<T> {
 		this.root().getAllParts().forEach(ModelPart::resetPose); //resets all limbs to t-pose before every animation
 		this.applyHeadRotation(netHeadYaw,headPitch,ageInTicks);
 
-		//this.animateWalk(ModAnimationsDefinitions.ALL_SIGHT_WALK, limbSwing, limbSwingAmount, 2f, 2.5f); defines animation for walk cycle
+		this.animateWalk(ModAnimationsDefinitions.ALL_SIGHT_WALK, limbSwing, limbSwingAmount, 10f, 20.5f); //defines animation for walk cycle
 		this.animate(((AllSightEntity)entity).idleAnimationState, ModAnimationsDefinitions.ALL_SIGHT_IDLE, ageInTicks, 1f);
+		this.animate(((AllSightEntity)entity).attackAnimationState, ModAnimationsDefinitions.ALL_SIGHT_ATTACK, ageInTicks, 1f);
 	}
 	//helper method for setting the heads rotation
 	private void applyHeadRotation(float pNetHeadYaw, float pHeadPitch, float pAgeInTicks) {

@@ -1,5 +1,10 @@
 package net.codywiebekehler.fracturedworldsmod.entity.custom;
 
+import net.codywiebekehler.fracturedworldsmod.entity.ai.AllSightAttackGoal;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializer;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.damagesource.DamageSource;
@@ -13,6 +18,8 @@ import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
+import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
+import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
@@ -22,19 +29,27 @@ import org.jetbrains.annotations.Nullable;
 import javax.naming.directory.Attribute;
 
 public class AllSightEntity extends Monster {
+    private static final EntityDataAccessor<Boolean> ATTACKING =
+            SynchedEntityData.defineId(AllSightEntity.class, EntityDataSerializers.BOOLEAN);
+
     public AllSightEntity(EntityType<? extends Monster> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
     }
 
+    public final AnimationState idleAnimationState = new AnimationState();
+    private int idleAnimationTimeout = 0;
+    public final AnimationState attackAnimationState = new AnimationState();
+    public int attackAnimationTimeout = 0;
+
     @Override
     protected void registerGoals() {
         this.goalSelector.addGoal(0, new FloatGoal(this));
-        //this.goalSelector.addGoal(5, new LookAtPlayerGoal(this, Player.class,8f));
-        //this.goalSelector.addGoal(1, new WaterAvoidingRandomStrollGoal(this, 0.5f));
-    }
+        this.goalSelector.addGoal(2, new WaterAvoidingRandomStrollGoal(this, 0.25f));
+        this.goalSelector.addGoal(1, new AllSightAttackGoal(this, 1.0D, true));
+        this.goalSelector.addGoal(5, new LookAtPlayerGoal(this, Player.class,8f));
 
-    public final AnimationState idleAnimationState = new AnimationState();
-    private int idleAnimationTimeout = 0;
+        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, true));
+    }
 
     @Override
     public void tick() {
@@ -42,6 +57,14 @@ public class AllSightEntity extends Monster {
 
         if (this.level().isClientSide()){
             setupAnimationStates();
+        }
+
+        if (!this.level().isClientSide) {
+            if (this.getTarget() != null) {
+                System.out.println("Target: " + this.getTarget().getName().getString());
+            } else {
+                System.out.println("NO TARGET");
+            }
         }
     }
 
@@ -51,6 +74,17 @@ public class AllSightEntity extends Monster {
             this.idleAnimationState.start(this.tickCount);
         }else {
             --this.idleAnimationTimeout;
+        }
+
+        if (this.isAttacking() && attackAnimationTimeout <= 0){
+            attackAnimationTimeout = 30; //length in ticks of attack animation
+            attackAnimationState.start(this.tickCount);
+        }else {
+            --this.attackAnimationTimeout;
+        }
+
+        if (!this.isAttacking()){
+            attackAnimationState.stop();
         }
     }
 
@@ -64,6 +98,19 @@ public class AllSightEntity extends Monster {
         }
 
         this.walkAnimation.update(f,0.2f);
+    }
+
+    public void setAttacking(boolean attacking){
+        this.entityData.set(ATTACKING, attacking);
+    }
+    public boolean isAttacking(){
+        return this.entityData.get(ATTACKING);
+    }
+
+    @Override
+    protected void defineSynchedData() {
+        super.defineSynchedData();
+        this.entityData.define(ATTACKING,false);
     }
 
     public static AttributeSupplier.Builder createAttributes(){
