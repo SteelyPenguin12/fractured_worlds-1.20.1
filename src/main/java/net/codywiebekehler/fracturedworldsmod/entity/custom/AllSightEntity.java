@@ -1,6 +1,7 @@
 package net.codywiebekehler.fracturedworldsmod.entity.custom;
 
 import net.codywiebekehler.fracturedworldsmod.entity.ai.AllSightAttackGoal;
+import net.codywiebekehler.fracturedworldsmod.entity.ai.AllSightDashAttackGoal;
 import net.codywiebekehler.fracturedworldsmod.entity.ai.AllSightShoutAttackGoal;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -17,6 +18,7 @@ import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.entity.player.Player;
@@ -49,10 +51,12 @@ public class AllSightEntity extends Monster {
         this.goalSelector.addGoal(2, new WaterAvoidingRandomStrollGoal(this, 0.25f));
         this.goalSelector.addGoal(5, new LookAtPlayerGoal(this, Player.class,8f));
         //attacks
-        this.goalSelector.addGoal(1, new AllSightAttackGoal(this, 1.0D, true));
-        this.goalSelector.addGoal(2, new AllSightShoutAttackGoal(this, 20.0F, 5F));
+        this.goalSelector.addGoal(1, new AllSightAttackGoal(this, 1.0D, true, 5.0F));
+        this.goalSelector.addGoal(2, new AllSightShoutAttackGoal(this, 10.0F, 5.0F));
+        this.goalSelector.addGoal(3, new AllSightDashAttackGoal(this, 999.0F, 10.0F, 1.5D));
         //target selector
         this.targetSelector.addGoal(1, new HurtByTargetGoal(this));
+        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, ArmorStand.class, true));
         this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true));
     }
 
@@ -62,6 +66,15 @@ public class AllSightEntity extends Monster {
 
         if (this.level().isClientSide()){
             setupAnimationStates();
+        }
+
+        //sets target to null if target dies or is in creative mode
+        if (this.getTarget() != null) {
+            if (!this.getTarget().isAlive()
+                    || (this.getTarget() instanceof Player player && player.isCreative())) {
+
+                this.setTarget(null);
+            }
         }
 
         /*

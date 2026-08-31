@@ -7,7 +7,10 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
+
+import java.util.EnumSet;
 
 public class AllSightShoutAttackGoal extends Goal {
 
@@ -22,19 +25,23 @@ public class AllSightShoutAttackGoal extends Goal {
         this.entity = (AllSightEntity) mob;
         this.attackRangeMax = _attackRangeMax;
         this.attackRangeMin = _attackRangeMin;
+
+        //goal flags
+        this.setFlags(EnumSet.of(
+                Flag.LOOK));
     }
 
     //determines conditions to start using this goal, only checked on goal entry
     @Override
     public boolean canUse() {
-        return entity.getTarget() != null && isTargetInRange();
+        return entity.getTarget() != null && isTargetInRange() && entity.getTarget().isAlive() && !(entity.getTarget() instanceof Player player && player.isCreative());
     }
 
     //determines the conditions under which this goal keeps going
     //returning false determines goal "completion" and move on to check new goal
     @Override
     public boolean canContinueToUse() {
-        return entity.getTarget() != null && isTargetInRange();
+        return canUse();
     }
 
     @Override
@@ -73,6 +80,9 @@ public class AllSightShoutAttackGoal extends Goal {
     //called when goal is exited
     @Override
     public void stop() {
+        if (!this.entity.level().isClientSide) {
+            System.out.println("shout attack goal stop() called");
+        }
         entity.setShoutAttacking(false); //stops shout attack animation loop when done
         super.stop();
     }
@@ -91,9 +101,6 @@ public class AllSightShoutAttackGoal extends Goal {
             this.entity.lookAt(this.entity.getTarget(),9999,9999);
             //play shout animation
             entity.setShoutAttacking(true);
-            if (!this.entity.level().isClientSide) {
-                System.out.println("shout attacking set true");
-            }
             //create particle trail for warden shout
             createShoutParticles(this.entity.getTarget());
             //deal direct damage to player
