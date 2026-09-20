@@ -32,6 +32,8 @@ public class AllSightEntity extends Monster {
             SynchedEntityData.defineId(AllSightEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> SHOUT_ATTACKING =
             SynchedEntityData.defineId(AllSightEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> DASH_ATTACKING =
+            SynchedEntityData.defineId(AllSightEntity.class, EntityDataSerializers.BOOLEAN);
 
     public AllSightEntity(EntityType<? extends Monster> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
@@ -43,21 +45,24 @@ public class AllSightEntity extends Monster {
     public int attackAnimationTimeout = 0;
     public final AnimationState shoutAnimationState = new AnimationState();
     public int shoutAnimationTimeout = 0;
+    public final AnimationState dashAnimationState = new AnimationState();
+    public int dashAnimationTimeout = 0;
 
     @Override
     protected void registerGoals() {
         //navigation/etc
         this.goalSelector.addGoal(0, new FloatGoal(this));
-        this.goalSelector.addGoal(2, new WaterAvoidingRandomStrollGoal(this, 0.25f));
-        this.goalSelector.addGoal(5, new LookAtPlayerGoal(this, Player.class,8f));
+        this.goalSelector.addGoal(1, new LookAtPlayerGoal(this, Player.class,8f));
+        this.goalSelector.addGoal(1, new WaterAvoidingRandomStrollGoal(this, 0.25f));
+
         //attacks
-        this.goalSelector.addGoal(1, new AllSightAttackGoal(this, 1.0D, true, 5.0F));
-        this.goalSelector.addGoal(2, new AllSightShoutAttackGoal(this, 10.0F, 5.0F));
-        this.goalSelector.addGoal(3, new AllSightDashAttackGoal(this, 999.0F, 10.0F, 1.5D));
+        this.goalSelector.addGoal(2, new AllSightAttackGoal(this, 1.0D, true, 5.0F));
+        this.goalSelector.addGoal(3, new AllSightShoutAttackGoal(this, 10.0F, 5.0F));
+        this.goalSelector.addGoal(4, new AllSightDashAttackGoal(this, 999.0F, 10.0F, 1.5D));
         //target selector
         this.targetSelector.addGoal(1, new HurtByTargetGoal(this));
-        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, ArmorStand.class, true));
-        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true));
+        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, ArmorStand.class, true));
+        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, true));
     }
 
     @Override
@@ -109,6 +114,12 @@ public class AllSightEntity extends Monster {
         }else{
             --this.shoutAnimationTimeout;
         }
+        if (this.isDashAttacking() && dashAnimationTimeout <= 0){
+            dashAnimationTimeout = (int) (2.5 * 20); //length in ticks of the dash animation
+            dashAnimationState.start(this.tickCount);
+        }else {
+            --this.dashAnimationTimeout;
+        }
 
         //stops the attack animations when networked variable says the attack is stopping
         if (!this.isAttacking()){
@@ -116,6 +127,9 @@ public class AllSightEntity extends Monster {
         }
         if (!this.isShoutAttacking()){
             shoutAnimationState.stop();
+        }
+        if(!this.isDashAttacking()){
+            dashAnimationState.stop();
         }
     }
 
@@ -144,6 +158,12 @@ public class AllSightEntity extends Monster {
     public boolean isShoutAttacking(){
         return this.entityData.get(SHOUT_ATTACKING);
     }
+    public void setDashAttacking(boolean dashAttacking){
+        this.entityData.set(DASH_ATTACKING, dashAttacking);
+    }
+    public boolean isDashAttacking(){
+        return this.entityData.get(DASH_ATTACKING);
+    }
 
 
     @Override
@@ -151,6 +171,7 @@ public class AllSightEntity extends Monster {
         super.defineSynchedData();
         this.entityData.define(ATTACKING,false);
         this.entityData.define(SHOUT_ATTACKING,false);
+        this.entityData.define(DASH_ATTACKING, false);
     }
 
     public static AttributeSupplier.Builder createAttributes(){

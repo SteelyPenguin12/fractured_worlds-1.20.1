@@ -34,19 +34,26 @@ public class AllSightShoutAttackGoal extends Goal {
     //determines conditions to start using this goal, only checked on goal entry
     @Override
     public boolean canUse() {
-        return entity.getTarget() != null && isTargetInRange() && entity.getTarget().isAlive() && !(entity.getTarget() instanceof Player player && player.isCreative());
+        return entity.getTarget() != null && entity.getTarget().isAlive() && !(entity.getTarget() instanceof Player player && player.isCreative()) && isTargetInRange();
     }
 
     //determines the conditions under which this goal keeps going
     //returning false determines goal "completion" and move on to check new goal
     @Override
     public boolean canContinueToUse() {
+        //this HAS to explicitly be canUse() even though its equivalent to super.continueToUse()
+        //otherwise the goal selector gets stuck on this goal and never exits, don't ask why, it's stupid
         return canUse();
     }
 
     @Override
     public void tick() {
         super.tick();
+
+        //keep rotated towards target during attack
+        if (this.entity.getTarget() != null){
+            this.entity.lookAt(this.entity.getTarget(),9999,9999);
+        }
 
         //decrement till 0
         this.ticksUntilNextAttack = Math.max(this.ticksUntilNextAttack -1, 0);
@@ -96,7 +103,7 @@ public class AllSightShoutAttackGoal extends Goal {
      * performs all checks and attempts to make a single shout attack
      */
     private void checkAndAttack(){
-        if (canUse()){
+        if (canUse() && this.entity.getTarget() != null){
             //look at target player
             this.entity.lookAt(this.entity.getTarget(),9999,9999);
             //play shout animation

@@ -15,10 +15,10 @@ public class AllSightDashAttackGoal extends Goal {
     private final float attackRangeMin;
     private final double dashSpeed;
 
-    private final int attackCooldown = 40; //must be animation length in ticks/2 (dont know why)
+    private final int attackCooldown = (int) (2.5 * 20)/2; //must be animation length in ticks/2 (don't know why)
     private int ticksUntilNextAttack = 0;
     private boolean isDashing = false;
-    private int dashMaxTimeout = 100;
+    private int dashMaxTimeout = 100; //maximum length in ticks to remain in dash before timing out and cancelling dash
     private int dashTimeout = 0;
 
     public AllSightDashAttackGoal(PathfinderMob mob, float attackRangeMax, float attackRangeMin, double dashSpeed){
@@ -44,7 +44,7 @@ public class AllSightDashAttackGoal extends Goal {
         if (isDashing){
             return true;
         }
-        return super.canContinueToUse(); //super of cancontinuetouse is just canuse()
+        return canUse();
     }
 
     @Override
@@ -58,6 +58,10 @@ public class AllSightDashAttackGoal extends Goal {
         if (!this.entity.level().isClientSide) {
             System.out.println("dash attack goal start() called");
         }
+        //look at target before charge up starts
+        this.entity.lookAt(this.entity.getTarget(),9999,9999);
+        //play dash animation before attack cooldown to show it "charging up"
+        entity.setDashAttacking(true);
         ticksUntilNextAttack = attackCooldown;
         dashTimeout = 0;
     }
@@ -66,7 +70,7 @@ public class AllSightDashAttackGoal extends Goal {
         if (!this.entity.level().isClientSide) {
             System.out.println("dash attack goal stop() called");
         }
-        //entity.setDashAttacking(false);
+        entity.setDashAttacking(false);
         super.stop();
     }
 
@@ -74,14 +78,21 @@ public class AllSightDashAttackGoal extends Goal {
     public void tick() {
         super.tick();
 
+        //keep rotated towards target during WHOLE attack (charge up and movement)
+        if (this.entity.getTarget() != null){
+            this.entity.lookAt(this.entity.getTarget(),9999,9999);
+        }
+
         this.ticksUntilNextAttack = Math.max(this.ticksUntilNextAttack -1, 0);
-        if (ticksUntilNextAttack <= 0){
+        if (ticksUntilNextAttack <= 0 && this.entity.getTarget() != null){
             checkAndAttack();
         }
 
+        //while is dashing
         if (this.isDashing && this.entity.getTarget() != null){
             //count how long entity has been dashing for
             dashTimeout++;
+
             //continue with momentum to push towards target
             Vec3 direction = this.entity.getTarget().position()
                     .subtract(entity.position())
@@ -112,16 +123,11 @@ public class AllSightDashAttackGoal extends Goal {
      */
     private void checkAndAttack(){
         if (canUse() && !isDashing){
-            //look at target player
-            this.entity.lookAt(this.entity.getTarget(),9999,9999);
-            //play dash animation
-            //entity.setDashAttacking(true);
-
             //set entity to start moving towards target
             this.isDashing = true;
             dashTimeout = 0;
         }else{
-            //entity.setDashAttacking(false);
+            entity.setDashAttacking(false);
         }
     }
 
@@ -151,7 +157,7 @@ public class AllSightDashAttackGoal extends Goal {
         //reset attack cooldown
         this.ticksUntilNextAttack = this.attackCooldown;
         //stop animation
-        //entity.setDashAttacking(false);
+        entity.setDashAttacking(false);
 
         //stop dash attack
         this.isDashing = false;

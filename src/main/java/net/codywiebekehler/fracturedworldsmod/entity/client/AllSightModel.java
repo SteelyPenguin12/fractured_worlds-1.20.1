@@ -487,6 +487,8 @@ public class AllSightModel<T extends Entity> extends HierarchicalModel<T> {
 		this.animate(((AllSightEntity)entity).idleAnimationState, ModAnimationsDefinitions.ALL_SIGHT_IDLE, ageInTicks, 1f);
 		this.animate(((AllSightEntity)entity).attackAnimationState, ModAnimationsDefinitions.ALL_SIGHT_ATTACK, ageInTicks, 1f);
 		this.animate(((AllSightEntity)entity).shoutAnimationState, ModAnimationsDefinitions.ALL_SIGHT_SHOUT, ageInTicks, 1f);
+		//dash animation played at half speed to make it longer for timing with the dash attack charge up phase
+		this.animate(((AllSightEntity)entity).dashAnimationState, ModAnimationsDefinitions.ALL_SIGHT_DASH, ageInTicks, 0.5f);
 	}
 	//helper method for setting the heads rotation
 	private void applyHeadRotation(float pNetHeadYaw, float pHeadPitch, float pAgeInTicks) {
