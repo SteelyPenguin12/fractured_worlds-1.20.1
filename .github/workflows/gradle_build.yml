@@ -41,11 +41,18 @@ jobs:
         name: Built-Forge-Mod
         path: build/libs/*.jar
 
+    - name: Get next version
+      uses: reecetech/version-increment@2026.8.4
+      id: version
+      with:
+        scheme: semver
+        increment: patch  # Automatically increments the patch number (x.x.+1)
+
     # creates a GitHub release from the build .jar file
     - name: Create a GitHub Release
       uses: softprops/action-gh-release@v2
       with:
-        tag_name: v0.1-1.20.1-beta
+        tag_name: v${{steps.version.outputs.version}}-1.20.1-beta
         files: build/libs/*.jar
       env:
         GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
