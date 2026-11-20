@@ -50,21 +50,37 @@ public class AllSightEntity extends Monster {
 
     @Override
     protected void registerGoals() {
-        //navigation/etc
-        this.goalSelector.addGoal(0, new FloatGoal(this));
-        this.goalSelector.addGoal(1, new LookAtPlayerGoal(this, Player.class,8f));
-        this.goalSelector.addGoal(1, new WaterAvoidingRandomStrollGoal(this, 0.25f));
 
         //target selectors
         this.targetSelector.addGoal(1, new HurtByTargetGoal(this));
         this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, ArmorStand.class, true));
         this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, true));
 
+        //navigation/etc
+        this.goalSelector.addGoal(0, new FloatGoal(this));
+        this.goalSelector.addGoal(1, new LookAtPlayerGoal(this, Player.class,8f));
+        this.goalSelector.addGoal(1, new WaterAvoidingRandomStrollGoal(this, 0.25f));
+
         //attacks
-        this.goalSelector.addGoal(2, new AllSightAttackGoal(this, 1.0D, true, 5.0F));
-        this.goalSelector.addGoal(3, new AllSightShoutAttackGoal(this, 10.0F, 5.0F));
+        this.goalSelector.addGoal(3, new AllSightShoutAttackGoal(this, 10.0F, 7.0F));
+        this.goalSelector.addGoal(3, new AllSightAttackGoal(this, 1.0D, true, 7.0F));
         this.goalSelector.addGoal(4, new AllSightDashAttackGoal(this, 30.0F, 10.0F, 1.5D));
 
+    }
+
+    private int shoutDelay = 100; //time in ticks to wait between shout usages
+    private int shoutCooldown = 0;
+
+    public int getShoutCooldown() {
+        return shoutCooldown;
+    }
+
+    public int getShoutDelay(){
+        return shoutDelay;
+    }
+
+    public void setShoutCooldown(int cooldown) {
+        this.shoutCooldown = cooldown;
     }
 
     @Override
@@ -92,6 +108,12 @@ public class AllSightEntity extends Monster {
                 System.out.println("NO TARGET");
             }
         }*/
+
+        //decrements shout cooldown constantly
+        if (shoutCooldown > 0){
+            shoutCooldown--;
+            //System.out.println("shoutCooldown: " + shoutCooldown);
+        }
     }
 
     private void setupAnimationStates(){
@@ -185,6 +207,7 @@ public class AllSightEntity extends Monster {
                 .add(Attributes.ARMOR, 2.0D)
                 .add(Attributes.ATTACK_DAMAGE, 2F)
                 .add(Attributes.ATTACK_KNOCKBACK, 1F);
+
     }
 
     @Override

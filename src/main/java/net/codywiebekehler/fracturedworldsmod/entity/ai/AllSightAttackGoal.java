@@ -36,26 +36,35 @@ public class AllSightAttackGoal extends MeleeAttackGoal {
     }
     @Override
     public boolean canContinueToUse() {
+        //canUse - isTargetInRange() check
         return canUse();
     }
-    //calculation for the range enemy must be in to be attacked with this attack, has both a min and max range
+    //calculation for the range enemy must be within to be attacked with this attack
     private boolean isTargetInRange(){
         return (entity.getTarget().distanceTo(entity) <= attackRange);
     }
 
     @Override
+    public boolean isInterruptable() {
+        return true;
+    }
+
+    @Override
     public void start() {
+        super.start();
+
         if (!this.entity.level().isClientSide) {
             System.out.println("melee attack goal start() called");
         }
-        super.start();
+
         attackDelay = 30;
         ticksUntilNextAttack = 30;
+
     }
 
     @Override
     protected void checkAndPerformAttack(LivingEntity pEnemy, double pDistToEnemySqr) {
-        if (isEnemyWithinAttackDistance(pEnemy, pDistToEnemySqr)) {
+        if (isTargetInRange()) {
             shouldCountTillNextAttack = true;
 
             if(isTimeToStartAttackAnimation()) {
@@ -104,9 +113,10 @@ public class AllSightAttackGoal extends MeleeAttackGoal {
     @Override
     public void tick() {
         super.tick();
-        if(shouldCountTillNextAttack){
+
+        //if(shouldCountTillNextAttack){
             this.ticksUntilNextAttack = Math.max(this.ticksUntilNextAttack -1, 0); //decrement with some logic to stop at 0
-        }
+        //}
     }
 
     @Override
@@ -115,6 +125,7 @@ public class AllSightAttackGoal extends MeleeAttackGoal {
             System.out.println("melee attack goal stop() called");
         }
         entity.setAttacking(false);
+
         super.stop();
     }
 

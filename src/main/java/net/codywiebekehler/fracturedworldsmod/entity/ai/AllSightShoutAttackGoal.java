@@ -34,7 +34,7 @@ public class AllSightShoutAttackGoal extends Goal {
     //determines conditions to start using this goal, only checked on goal entry
     @Override
     public boolean canUse() {
-        return entity.getTarget() != null && entity.getTarget().isAlive() && !(entity.getTarget() instanceof Player player && player.isCreative()) && isTargetInRange();
+        return entity.getShoutCooldown() <= 0 && entity.getTarget() != null && entity.getTarget().isAlive() && !(entity.getTarget() instanceof Player player && player.isCreative()) && isTargetInRange();
     }
 
     //determines the conditions under which this goal keeps going
@@ -93,6 +93,7 @@ public class AllSightShoutAttackGoal extends Goal {
             System.out.println("shout attack goal stop() called");
         }
         entity.setShoutAttacking(false); //stops shout attack animation loop when done
+
         super.stop();
     }
 
@@ -117,6 +118,9 @@ public class AllSightShoutAttackGoal extends Goal {
             //this.entity.doHurtTarget(this.entity.getTarget());
             //reset attack cooldown
             this.ticksUntilNextAttack = this.attackCooldown;
+
+            //resets cooldown for when this GOAL can next be used, preventing goal from running consequtively
+            entity.setShoutCooldown(entity.getShoutDelay());
         }else{
             entity.setShoutAttacking(false); //cancels attack animation loop if attack fails
         }
