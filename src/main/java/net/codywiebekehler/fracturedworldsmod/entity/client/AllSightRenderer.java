@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.codywiebekehler.fracturedworldsmod.FracturedWorldsMod;
 import net.codywiebekehler.fracturedworldsmod.entity.custom.AllSightEntity;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
@@ -47,6 +48,7 @@ public class AllSightRenderer extends MobRenderer<AllSightEntity, AllSightModel<
 
         // Normal rendering
         super.render(pEntity, pEntityYaw, pPartialTicks, pPoseStack, pBuffer, pPackedLight);
+
         /**
         // Emissive rendering
         VertexConsumer emissiveBuffer =
