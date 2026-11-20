@@ -6,6 +6,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
+import net.minecraft.world.entity.player.Player;
 
 import java.util.EnumSet;
 
@@ -31,17 +32,15 @@ public class AllSightAttackGoal extends MeleeAttackGoal {
 
     @Override
     public boolean canUse() {
-        return super.canUse();
+        return entity.getTarget() != null && entity.getTarget().isAlive() && !(entity.getTarget() instanceof Player player && player.isCreative()) && isTargetInRange();
     }
     @Override
     public boolean canContinueToUse() {
-        //adds the condition of being outside of max range on top of existing meleeattackgoal stop conditions
-        //stops boss from chasing you down forever once you get in melee range once
-        if (this.mob.distanceTo(this.mob.getTarget()) >= this.attackRange){
-            return false;
-        }else {
-            return super.canContinueToUse();
-        }
+        return canUse();
+    }
+    //calculation for the range enemy must be in to be attacked with this attack, has both a min and max range
+    private boolean isTargetInRange(){
+        return (entity.getTarget().distanceTo(entity) <= attackRange);
     }
 
     @Override
@@ -118,4 +117,5 @@ public class AllSightAttackGoal extends MeleeAttackGoal {
         entity.setAttacking(false);
         super.stop();
     }
+
 }

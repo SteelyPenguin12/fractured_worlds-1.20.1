@@ -55,14 +55,16 @@ public class AllSightEntity extends Monster {
         this.goalSelector.addGoal(1, new LookAtPlayerGoal(this, Player.class,8f));
         this.goalSelector.addGoal(1, new WaterAvoidingRandomStrollGoal(this, 0.25f));
 
+        //target selectors
+        this.targetSelector.addGoal(1, new HurtByTargetGoal(this));
+        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, ArmorStand.class, true));
+        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, true));
+
         //attacks
         this.goalSelector.addGoal(2, new AllSightAttackGoal(this, 1.0D, true, 5.0F));
         this.goalSelector.addGoal(3, new AllSightShoutAttackGoal(this, 10.0F, 5.0F));
         this.goalSelector.addGoal(4, new AllSightDashAttackGoal(this, 30.0F, 10.0F, 1.5D));
-        //target selector
-        this.targetSelector.addGoal(1, new HurtByTargetGoal(this));
-        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, ArmorStand.class, true));
-        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, true));
+
     }
 
     @Override

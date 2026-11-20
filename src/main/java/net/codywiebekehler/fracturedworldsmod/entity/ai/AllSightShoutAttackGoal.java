@@ -58,18 +58,20 @@ public class AllSightShoutAttackGoal extends Goal {
         //decrement till 0
         this.ticksUntilNextAttack = Math.max(this.ticksUntilNextAttack -1, 0);
 
-//        if (!this.entity.level().isClientSide) {
-//            System.out.println("shout attack is ticking, ticks until next attack: "+this.ticksUntilNextAttack);
-//        }
+        if (!this.entity.level().isClientSide) {
+            System.out.println("shout attack is ticking, ticks until next attack: "+this.ticksUntilNextAttack);
+        }
 
         if (ticksUntilNextAttack <= 0){
             checkAndAttack();
         }
     }
 
+    //this is identical to its super, it stands as a reminder NOT TO CHANGE IT to false
+    //otherwise mob gets stuck in this attack after "stoping"
     @Override
     public boolean isInterruptable() {
-        return false;
+        return true;
     }
 
     //called when goal is entered
